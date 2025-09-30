@@ -23,7 +23,7 @@ app.use(express.json());
 app.use("/api/tours", tourRouter);
 app.use("/api/users", userRouter);
 app.use("/api/review", reviewRouter);
-app.use("/api/user/", bookingRouter);
+app.use("/api/user", bookingRouter);
 
 app.use(errorHandler);
 
