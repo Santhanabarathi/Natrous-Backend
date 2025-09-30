@@ -10,7 +10,6 @@ router
   .get(userController.getAllUser)
   .delete(userController.deleteManyUser);
 
-// router.route("/signup").post(userController.createUser);
 router.route("/signup").post(authController.createUser);
 
 router.route("/login").post(authController.loginUser);
