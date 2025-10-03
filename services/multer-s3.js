@@ -22,7 +22,7 @@ const upload = multer({ storage });
 const uploadFields = upload.fields([
   { name: "imageCover", maxCount: 1 },
   { name: "images", maxCount: 3 },
-  { name: "profileImage", maxCount: 1 },
+  { name: "photo", maxCount: 1 },
 ]);
 
 const uploadAllFiles = async (req, res, next) => {
@@ -33,7 +33,7 @@ const uploadAllFiles = async (req, res, next) => {
       // Handle tour cover
       if (req.files["imageCover"] && req.files["imageCover"][0]) {
         const file = req.files["imageCover"][0];
-        const key = `TourImages/${Date.now()}-${file.originalname}`;
+        const key = `Tour-cover/${Date.now()}-${file.originalname}`;
         await s3Client.send(
           new PutObjectCommand({
             Bucket: process.env.AWS_BUCKET_NAME,
@@ -49,7 +49,7 @@ const uploadAllFiles = async (req, res, next) => {
       if (req.files["images"] && req.files["images"].length > 0) {
         const urls = await Promise.all(
           req.files["images"].map(async (file) => {
-            const key = `TourImages/${Date.now()}-${file.originalname}`;
+            const key = `TourImage/${Date.now()}-${file.originalname}`;
             await s3Client.send(
               new PutObjectCommand({
                 Bucket: process.env.AWS_BUCKET_NAME,
@@ -65,9 +65,9 @@ const uploadAllFiles = async (req, res, next) => {
       }
 
       // Handle user profile image
-      if (req.files["profileImage"] && req.files["profileImage"][0]) {
-        const file = req.files["profileImage"][0];
-        const key = `UserProfile/${Date.now()}-${file.originalname}`;
+      if (req.files["photo"] && req.files["photo"][0]) {
+        const file = req.files["photo"][0];
+        const key = `ProfileImage/${Date.now()}-${file.originalname}`;
         await s3Client.send(
           new PutObjectCommand({
             Bucket: process.env.AWS_BUCKET_NAME,
