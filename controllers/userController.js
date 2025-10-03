@@ -49,8 +49,8 @@ exports.getOneUser = catchAsync(async (req, res, next) => {
 });
 
 exports.updateUser = catchAsync(async (req, res, next) => {
-  if (req.file) {
-    req.body.photo = req.file.key;
+  if (req.profileImage) {
+    req.body.photo = req.profileImage.key;
   }
 
   const users = await User.findByIdAndUpdate(req.params.id, req.body, {
