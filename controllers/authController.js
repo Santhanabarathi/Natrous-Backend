@@ -52,7 +52,9 @@ exports.createUser = async (req, res, next) => {
   const pas = await bcrypt.hash(password, 10);
 
   // photo comes from multer
-  const photo = req.file ? `${process.env.DEV_URL}/${req.file.filename}` : null;
+  // const photo = req.file ? `${process.env.DEV_URL}/${req.file.filename}` : null;
+
+  let photo = null;
 
   const newUser = await User.create({
     name,
@@ -73,6 +75,13 @@ exports.createUser = async (req, res, next) => {
     },
   });
 };
+
+// app.post("/profile", singleUpload("photo", "ProfileImages"), (req, res) => {
+//   res.json({
+//     message: "File uploaded successfully",
+//     url: req.file.location,
+//   });
+// });
 
 exports.loginUser = async (req, res, next) => {
   const { email, password } = req.body;

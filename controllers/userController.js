@@ -1,5 +1,6 @@
 const { catchAsync } = require("../utils/catchAsync");
 const User = require("../models/userSchema");
+const { generatePresignedUrl } = require("../services/multer-s3");
 
 exports.getAllUser = catchAsync(async (req, res, next) => {
   // const filter = {};
@@ -26,11 +27,17 @@ exports.getOneUser = catchAsync(async (req, res, next) => {
     select: "name",
   });
 
+  let photoUrl = null;
+
+  if (user.photo) {
+    photoUrl = await generatePresignedUrl(user.photo);
+  }
+
   const userDetails = {
     name: user.name,
     email: user.email,
     password: user.password,
-    photo: user.photo,
+    photo: photoUrl,
     tour: user.tour,
     _id: user._id,
   };
@@ -43,7 +50,7 @@ exports.getOneUser = catchAsync(async (req, res, next) => {
 
 exports.updateUser = catchAsync(async (req, res, next) => {
   if (req.file) {
-    req.body.photo = `${process.env.DEV_URL}/${req.file.filename}`;
+    req.body.photo = req.file.key;
   }
 
   const users = await User.findByIdAndUpdate(req.params.id, req.body, {

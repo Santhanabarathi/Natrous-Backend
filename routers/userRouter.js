@@ -1,7 +1,7 @@
 const express = require("express");
 const userController = require("../controllers/userController");
 const authController = require("../controllers/authController");
-const { upload } = require("../upload");
+const { uploadAllFiles } = require("../services/multer-s3");
 
 const router = express.Router();
 
@@ -28,7 +28,7 @@ router.route("/guides").get(userController.getAllGuide);
 router
   .route("/:id")
   .get(userController.getOneUser)
-  .put(upload.single("photo"), userController.updateUser)
+  .put(uploadAllFiles, userController.updateUser)
   .delete(userController.deleteUser);
 
 module.exports = router;

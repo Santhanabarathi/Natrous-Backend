@@ -1,5 +1,9 @@
-const { json } = require("express");
 const Tour = require("../models/tourSchema");
+const {
+  generatePresignedUrl,
+  singleUpload,
+  multiUpload,
+} = require("../services/multer-s3");
 const AppError = require("../utils/appError");
 const { catchAsync } = require("../utils/catchAsync");
 
@@ -33,6 +37,19 @@ exports.getTour = catchAsync(async (req, res, next) => {
     })
     .lean();
 
+  // Generate signed URL for imageCover
+  if (tour.imageCover) {
+    tour.imageCover = await generatePresignedUrl(tour.imageCover);
+  }
+
+  // Generate signed URLs for multiple images
+  if (tour.images && tour.images.length > 0) {
+    tour.images = await Promise.all(
+      tour.images.map(async (key) => await generatePresignedUrl(key))
+    );
+  }
+
+  // Optional: remove tour field from reviews
   if (tour.reviews) {
     tour.reviews.forEach((r) => delete r.tour);
   }
@@ -84,14 +101,11 @@ exports.createTour = async (req, res) => {
 };
 
 exports.updateTour = async (req, res) => {
-  if (req.files && req.files.imageCover) {
-    req.body.imageCover = `${process.env.DEV_URL}/${req.files.imageCover[0].filename}`;
+  if (req.file) {
+    req.body.imageCover = req.file.key;
   }
-
-  if (req.files && req.files.images) {
-    req.body.images = req.files.images.map(
-      (file) => `${process.env.DEV_URL}/${file.filename}`
-    );
+  if (req.uploadedFiles) {
+    req.body.images = req.uploadedFiles;
   }
 
   if (req.body.startDates && typeof req.body.startDates === "string") {

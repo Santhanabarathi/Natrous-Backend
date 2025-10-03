@@ -19,6 +19,7 @@ app.use("/", express.static(folder));
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/tours", tourRouter);
 app.use("/api/users", userRouter);
@@ -28,20 +29,3 @@ app.use("/api/user", bookingRouter);
 app.use(errorHandler);
 
 module.exports = app;
-
-// multer error handling
-
-// app.use((err, req, res, next) => {
-//   if (err instanceof multer.MulterError) {
-//     switch (err.code) {
-//       case "LIMIT_FILE_SIZE":
-//         return res
-//           .status(400)
-//           .json({ message: "file size is to large , max size 5MB" });
-//       default:
-//         return res.status(400).json({ message: err.message });
-//     }
-//   } else {
-//     return res.status(400).json({ message: err.message });
-//   }
-// });
