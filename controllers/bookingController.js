@@ -46,11 +46,14 @@ exports.getBookedUserDetails = async (req, res) => {
   });
 };
 
-exports.deleteBookingTour = async (req, res, next) => {
-  await Booking.findByIdAndDelete(req.params.id);
+exports.deleteBooking = async (req, res, next) => {
+  try {
+    const { userId, tourId } = req.params;
 
-  res.status(200).json({
-    status: "success",
-    message: "deleted the booking tour",
-  });
+    await Booking.findOneAndDelete({ user: userId, tour: tourId });
+
+    res.status(200).json({ status: "success", message: "Booking deleted" });
+  } catch (err) {
+    next(err);
+  }
 };

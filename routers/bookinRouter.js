@@ -10,6 +10,8 @@ router
 
 router.route("/getBooked-tour").get(bookingController.getBookedUserDetails);
 
-router.route("/book-tour/:id").delete(bookingController.deleteBookingTour);
+router
+  .route("/book-tour/:userId/:tourId")
+  .delete(bookingController.deleteBooking);
 
 module.exports = router;
