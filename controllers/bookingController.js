@@ -20,6 +20,8 @@ exports.getAllBookings = async (req, res, next) => {
   try {
     const bookings = await Booking.find();
 
+    if (!bookings) return res.status(404).json({ message: "no tours booked" });
+
     res.status(200).json({
       status: "success",
       results: bookings.length,
@@ -41,5 +43,14 @@ exports.getBookedUserDetails = async (req, res) => {
     status: "success",
     length: Book.length,
     data: Book,
+  });
+};
+
+exports.deleteBookingTour = async (req, res, next) => {
+  await Booking.findByIdAndDelete(req.params.id);
+
+  res.status(200).json({
+    status: "success",
+    message: "deleted the booking tour",
   });
 };
