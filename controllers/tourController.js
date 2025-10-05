@@ -1,9 +1,5 @@
 const Tour = require("../models/tourSchema");
-const {
-  generatePresignedUrl,
-  singleUpload,
-  multiUpload,
-} = require("../services/multer-s3");
+const { generatePresignedUrl } = require("../services/multer-s3");
 const AppError = require("../utils/appError");
 const { catchAsync } = require("../utils/catchAsync");
 
@@ -11,10 +7,15 @@ exports.getAlltour = async (req, res) => {
   try {
     const tours = await Tour.find();
 
-    // Generate signed URL for imageCover
-    if (tours.imageCover) {
-      tours.imageCover = await generatePresignedUrl(tours.imageCover);
-    }
+    tours = await Promise.all(
+      tours.map(async (tour) => {
+        // Generate signed URL for imageCover
+        if (tour.imageCover) {
+          tour.imageCover = await generatePresignedUrl(tour.imageCover);
+        }
+        return tours;
+      })
+    );
 
     res.status(200).json({
       status: "success",
