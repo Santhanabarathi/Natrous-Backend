@@ -5,7 +5,7 @@ const { catchAsync } = require("../utils/catchAsync");
 
 exports.getAlltour = async (req, res) => {
   try {
-    const tours = await Tour.find();
+    let tours = await Tour.find();
 
     tours = await Promise.all(
       tours.map(async (tour) => {
