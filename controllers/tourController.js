@@ -13,7 +13,7 @@ exports.getAlltour = async (req, res) => {
         if (tour.imageCover) {
           tour.imageCover = await generatePresignedUrl(tour.imageCover);
         }
-        return tours;
+        return tour;
       })
     );
 
