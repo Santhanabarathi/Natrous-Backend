@@ -7,13 +7,21 @@ exports.getAlltour = async (req, res) => {
   try {
     let tours = await Tour.find();
 
+    // tours = await Promise.all(
+    //   tours.map(async (tour) => {
+    //     // Generate signed URL for imageCover
+    //     if (tour.imageCover) {
+    //       tour.imageCover = await generatePresignedUrl(tour.imageCover);
+    //     }
+    //     return tour;
+    //   })
+    // );
     tours = await Promise.all(
       tours.map(async (tour) => {
-        // Generate signed URL for imageCover
-        if (tour.imageCover) {
+        if (tour?.imageCover) {
           tour.imageCover = await generatePresignedUrl(tour.imageCover);
         }
-        return tour;
+        return tour; // ✅ Make sure to return the tour
       })
     );
 
