@@ -11,6 +11,11 @@ exports.getAlltour = async (req, res) => {
   try {
     const tours = await Tour.find();
 
+    // Generate signed URL for imageCover
+    if (tours.imageCover) {
+      tours.imageCover = await generatePresignedUrl(tours.imageCover);
+    }
+
     res.status(200).json({
       status: "success",
       results: tours.length,
@@ -33,9 +38,21 @@ exports.getTour = catchAsync(async (req, res, next) => {
     })
     .populate({
       path: "guides",
-      select: "name email role",
+      select: "name email role photo",
     })
     .lean();
+
+  // Generate signed URLs for guide photos
+  if (tour.guides && tour.guides.length > 0) {
+    tour.guides = await Promise.all(
+      tour.guides.map(async (guide) => {
+        if (guide.photo) {
+          guide.photo = await generatePresignedUrl(guide.photo);
+        }
+        return guide;
+      })
+    );
+  }
 
   // Generate signed URL for imageCover
   if (tour.imageCover) {
