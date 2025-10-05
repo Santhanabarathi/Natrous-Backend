@@ -9,21 +9,12 @@ exports.getAlltour = async (req, res) => {
 
     // tours = await Promise.all(
     //   tours.map(async (tour) => {
-    //     // Generate signed URL for imageCover
-    //     if (tour.imageCover) {
+    //     if (tour?.imageCover) {
     //       tour.imageCover = await generatePresignedUrl(tour.imageCover);
     //     }
-    //     return tour;
+    //     return tour; // ✅ Make sure to return the tour
     //   })
     // );
-    tours = await Promise.all(
-      tours.map(async (tour) => {
-        if (tour?.imageCover) {
-          tour.imageCover = await generatePresignedUrl(tour.imageCover);
-        }
-        return tour; // ✅ Make sure to return the tour
-      })
-    );
 
     res.status(200).json({
       status: "success",
