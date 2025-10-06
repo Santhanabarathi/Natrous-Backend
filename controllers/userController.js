@@ -3,12 +3,6 @@ const User = require("../models/userSchema");
 const { generatePresignedUrl } = require("../services/multer-s3");
 
 exports.getAllUser = catchAsync(async (req, res, next) => {
-  // const filter = {};
-
-  // if (req.query.role) {
-  //   filter.role = req.query.role;
-  // }
-
   const user = await User.find().select("name email role").populate({
     path: "tour",
     select: "_id name",

@@ -34,12 +34,12 @@ exports.verifyToken = (req, res, next) => {
 
 const generateToken = (user) => {
   const userName = { name: user.name };
-  return jwt.sign(userName, process.env.SECRET_KEY, { expiresIn: "15m" });
+  return jwt.sign(userName, process.env.SECRET_KEY, { expiresIn: "30m" });
 };
 
-const refreshToken = (user) => {
+const refreshtoken = (user) => {
   const userId = { id: user._id };
-  return jwt.sign(userId, process.env.REFRESH_KEY, { expiresIn: "1d" });
+  return jwt.sign(userId, process.env.REFRESH_KEY, { expiresIn: "3h" });
 };
 
 exports.createUser = async (req, res, next) => {
@@ -50,9 +50,6 @@ exports.createUser = async (req, res, next) => {
   }
 
   const pas = await bcrypt.hash(password, 10);
-
-  // photo comes from multer
-  // const photo = req.file ? `${process.env.DEV_URL}/${req.file.filename}` : null;
 
   let photo = null;
 
@@ -76,13 +73,6 @@ exports.createUser = async (req, res, next) => {
   });
 };
 
-// app.post("/profile", singleUpload("photo", "ProfileImages"), (req, res) => {
-//   res.json({
-//     message: "File uploaded successfully",
-//     url: req.file.location,
-//   });
-// });
-
 exports.loginUser = async (req, res, next) => {
   const { email, password } = req.body;
 
@@ -99,7 +89,7 @@ exports.loginUser = async (req, res, next) => {
   }
 
   const accessToken = generateToken(getUser);
-  const refresh_Token = refreshToken(getUser);
+  const refresh_Token = refreshtoken(getUser);
 
   res.status(200).json({
     status: "success",
@@ -142,13 +132,6 @@ exports.forgotPassword = async (req, res) => {
       .json({ message: "User not found with this email address" });
   }
 
-  // const resetToken = jwt.sign({ id: user._id }, process.env.SECRET_KEY, {
-  //   expiresIn: "5m",
-  // });
-
-  // (user.resetToken = resetToken),
-  //   (user.resetTokenExpiresAt = Date.now() + 15 * 60 * 1000);
-
   const otpGen = otpGenerator.generate(4, {
     upperCaseAlphabets: false,
     specialChars: false,
@@ -171,8 +154,6 @@ exports.forgotPassword = async (req, res) => {
       pass: process.env.AUTH_PASSWORD,
     },
   });
-
-  // const resetUrl = `http://127.0.0.1:30002/api/users/reset-password/${resetToken}`;
 
   const sendMailOption = {
     from: process.env.AUTH_EMAIL,

@@ -14,7 +14,7 @@ function handleValidationError(err) {
 function handleDuplicate(err) {
   const field = Object.keys(err.keyValue)[0];
   const value = err.keyValue[field];
-  const message = `Duplicate field value: "${value}" for "${field}". Please use another value!`;
+  const message = `The user or email is already exist `;
   return new AppError(message, 400);
 }
 

@@ -29,6 +29,9 @@ const uploadAllFiles = async (req, res, next) => {
   uploadFields(req, res, async (err) => {
     if (err) return next(err);
 
+    if (!req.files) return next();
+
+    console.log(req.files, "userprofile");
     try {
       // Handle tour cover
       if (req.files["imageCover"] && req.files["imageCover"][0]) {
