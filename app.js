@@ -17,11 +17,8 @@ app.use("/", express.static(folder));
 // or
 // app.use("/upload", express.static("upload-Images"));
 
-app.use("/", (req, res, next) => {
-  res.status(200),
-    json({
-      status: "success",
-    });
+app.use("/", (req, res) => {
+  res.send("API working");
 });
 
 app.use(cors());
