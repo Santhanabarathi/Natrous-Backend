@@ -24,7 +24,7 @@ router.route("/verify-otp").post(verifyToken, authController.verifyOtp);
 
 router.route("/resetPassword").put(verifyToken, authController.resetPassword);
 
-router.route("/guides").get(verifyToken, userController.getAllGuide);
+router.route("/guides").get(userController.getAllGuide);
 
 router.route("/refreshToken").post(authController.refreshToken);
 
