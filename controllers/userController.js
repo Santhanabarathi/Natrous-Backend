@@ -4,8 +4,8 @@ const { generatePresignedUrl } = require("../services/multer-s3");
 
 exports.getAllUser = catchAsync(async (req, res, next) => {
   const user = await User.find().select("name email role").populate({
-    path: "tour",
-    select: "_id name",
+    path: "tours",
+    select: "_id name ",
   });
 
   res.status(200).json({
@@ -17,7 +17,7 @@ exports.getAllUser = catchAsync(async (req, res, next) => {
 
 exports.getOneUser = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.params.id).populate({
-    path: "tour",
+    path: "tours",
     select: "name",
   });
 
@@ -32,8 +32,8 @@ exports.getOneUser = catchAsync(async (req, res, next) => {
     email: user.email,
     password: user.password,
     photo: photoUrl,
-    tour: user.tour,
     _id: user._id,
+    tours: user.tours,
   };
 
   res.status(200).json({
@@ -98,11 +98,32 @@ exports.getAllGuide = catchAsync(async (req, res, next) => {
     filter.role = req.query.role;
   }
 
-  const guide = await User.find(filter);
+  const guide = await User.find(filter).populate({
+    path: "tours",
+    select: "name",
+  });
+
+  const usersWithPhoto = await Promise.all(
+    guide.map(async (g) => {
+      let photoUrl = null;
+      if (g.photo) {
+        photoUrl = await generatePresignedUrl(g.photo);
+      }
+
+      return {
+        _id: g._id,
+        name: g.name,
+        email: g.email,
+        photo: photoUrl,
+        role: g.role,
+        tours: g.tours,
+      };
+    })
+  );
 
   res.status(200).json({
     status: "success",
     result: guide.length,
-    data: guide,
+    data: usersWithPhoto,
   });
 });

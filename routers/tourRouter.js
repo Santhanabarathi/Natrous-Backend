@@ -10,6 +10,8 @@ router
   .get(tourController.getAlltour)
   .post(verifyToken, uploadAllFiles, tourController.createTour);
 
+router.route("/guideUpdate/:id").put(tourController.bulkUpdateGuides);
+
 router
   .route("/:id")
   .get(tourController.getTour)

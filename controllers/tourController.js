@@ -160,3 +160,110 @@ exports.deleteTour = async (req, res) => {
     message: "deleted",
   });
 };
+
+const User = require("../models/userSchema");
+const mongoose = require("mongoose");
+
+exports.bulkUpdateGuides = async (req, res) => {
+  let { guideId, tourId } = req.body;
+
+  if (!guideId || !tourId) {
+    return res.status(400).json({
+      status: "fail",
+      message: "guideId and tourId are required",
+    });
+  }
+
+  // Ensure tourId is an array
+  if (!Array.isArray(tourId)) tourId = [tourId];
+
+  const tourIds = tourId.map((id) => new mongoose.Types.ObjectId(id));
+  const guideObjectId = new mongoose.Types.ObjectId(guideId);
+
+  // 1️⃣ Update the user's tours (replace old ones)
+  await User.findByIdAndUpdate(guideObjectId, { tours: tourIds });
+
+  // 2️⃣ Update tours: add guide to new tours
+  await Tour.updateMany(
+    { _id: { $in: tourIds } },
+    { $addToSet: { guides: guideObjectId } }
+  );
+
+  // 3️⃣ Optionally: remove guide from tours no longer assigned
+  await Tour.updateMany(
+    { _id: { $nin: tourIds }, guides: guideObjectId },
+    { $pull: { guides: guideObjectId } }
+  );
+
+  res.status(200).json({
+    status: "success",
+    message: "Guide tours updated successfully",
+  });
+};
+
+// exports.bulkUpdateGuides = async (req, res) => {
+//   const { tourid, guides } = req.body;
+
+//   if (!tourid || !guides) {
+//     return res.status(400).json({
+//       status: "fail",
+//       message: "tourid and guides are required",
+//     });
+//   }
+
+//   const tourIds = tourid.map((id) => new mongoose.Types.ObjectId(id));
+//   const guideIds = guides.map((id) => new mongoose.Types.ObjectId(id));
+
+//   // ✅ 1️⃣ Update all tours: add guides
+//   await Tour.updateMany(
+//     { _id: { $in: tourIds } },
+//     { $addToSet: { guides: { $each: guideIds } } } // avoids duplicates
+//   );
+
+//   // ✅ 2️⃣ Update all users: add those tours to each guide
+//   await User.updateMany(
+//     { _id: { $in: guideIds } },
+//     { $addToSet: { tours: { $each: tourIds } } } // avoids duplicates
+//   );
+
+//   // ✅ 3️⃣ Fetch updated data to confirm
+//   const updatedTours = await Tour.find({ _id: { $in: tourIds } })
+//     .select("name guides")
+//     .populate("guides", "name email");
+
+//   res.status(200).json({
+//     status: "success",
+//     message: "Guides and users updated successfully",
+//     data: {
+//       tours: updatedTours,
+//     },
+//   });
+// };
+
+// const mongoose = require("mongoose");
+
+// exports.bulkUpdateGuides = async (req, res) => {
+//   const { tourid, guides } = req.body;
+
+//   if (!tourid || !guides) {
+//     return res.status(400).json({
+//       status: "fail",
+//       message: "tourid and guides are required",
+//     });
+//   }
+
+//   const tourIds = tourid.map((id) => new mongoose.Types.ObjectId(id));
+//   const guidesObjectId = guides.map((id) => new mongoose.Types.ObjectId(id));
+
+//   const upMany = await Tour.updateMany(
+//     { _id: { $in: tourIds } },
+//     { $addToSet: { guides: { $each: guidesObjectId } } } // ✅ add new guides without removing old ones
+//   );
+
+//   res.status(200).json({
+//     status: "success",
+//     data: {
+//       upMany,
+//     },
+//   });
+// };
