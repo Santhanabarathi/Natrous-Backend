@@ -12,6 +12,14 @@ exports.getAlltour = async (req, res) => {
         if (tour?.imageCover) {
           tour.imageCover = await generatePresignedUrl(tour.imageCover);
         }
+
+        // ✅ sign all images
+        if (tour.images && tour.images.length > 0) {
+          tour.images = await Promise.all(
+            tour.images.map(async (key) => await generatePresignedUrl(key))
+          );
+        }
+
         return tour; // ✅ Make sure to return the tour
       })
     );
@@ -83,14 +91,12 @@ exports.getTour = catchAsync(async (req, res, next) => {
 
 exports.createTour = async (req, res) => {
   try {
-    if (req.files && req.files.imageCover) {
-      req.body.imageCover = `${process.env.DEV_URL}/${req.files.imageCover[0].filename}`;
+    if (req.file) {
+      req.body.imageCover = req.file.key; // S3 object key
     }
 
-    if (req.files && req.files.images) {
-      req.body.images = req.files.images.map(
-        (file) => `${process.env.DEV_URL}/${file.filename}`
-      );
+    if (req.uploadedFiles && req.uploadedFiles.length > 0) {
+      req.body.images = req.uploadedFiles;
     }
 
     if (req.body.startDates && typeof req.body.startDates === "string") {
@@ -118,11 +124,53 @@ exports.createTour = async (req, res) => {
 };
 
 exports.updateTour = async (req, res) => {
+  const tourdetails = await Tour.findById(req.params.id);
+
+  if (req.body.removedImages && typeof req.body.removedImages === "string") {
+    req.body.removedImages = JSON.parse(req.body.removedImages);
+  }
+
+  if (req.body.removedImageCover) {
+    req.body.removedImageCover = JSON.parse(req.body.removedImageCover);
+  }
+
+  const bucketBaseUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/`;
+
+  //  images convet to key
+  const removeKeys = Array.isArray(req.body.removedImages)
+    ? req.body.removedImages.map(
+        (url) => url.replace(bucketBaseUrl, "").split("?")[0]
+      )
+    : [];
+
+  tourdetails.images = tourdetails.images.filter(
+    (key) => !removeKeys.includes(key)
+  );
+
+  // cover image convet to key
+  const removeCoverKey = req.body.removedImageCover
+    .replace(bucketBaseUrl, "")
+    .split("?")[0];
+
+  if (tourdetails.imageCover === removeCoverKey) {
+    tourdetails.imageCover = null;
+  }
+
+  await tourdetails.save();
+
+  console.log(tourdetails.imageCover, "remvoe");
+
+  // upload images
   if (req.file) {
     req.body.imageCover = req.file.key;
   }
-  if (req.uploadedFiles) {
-    req.body.images = req.uploadedFiles;
+
+  // Merge existing images (after removal) with newly uploaded images
+  if (req.uploadedFiles && req.uploadedFiles.length > 0) {
+    req.body.images = [...tourdetails.images, ...req.uploadedFiles];
+  } else {
+    // keep the remaining images if no new upload
+    req.body.images = tourdetails.images;
   }
 
   if (req.body.startDates && typeof req.body.startDates === "string") {

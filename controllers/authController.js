@@ -34,7 +34,7 @@ exports.verifyToken = (req, res, next) => {
 
 const generateToken = (user) => {
   const userName = { name: user.name };
-  return jwt.sign(userName, process.env.SECRET_KEY, { expiresIn: "30m" });
+  return jwt.sign(userName, process.env.SECRET_KEY, { expiresIn: "1h" });
 };
 
 const refreshtoken = (user) => {
