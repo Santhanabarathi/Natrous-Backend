@@ -126,17 +126,12 @@ exports.createTour = async (req, res) => {
 exports.updateTour = async (req, res) => {
   const tourdetails = await Tour.findById(req.params.id);
 
+  // --- Handle removedImages --
   if (req.body.removedImages && typeof req.body.removedImages === "string") {
     req.body.removedImages = JSON.parse(req.body.removedImages);
   }
 
-  if (req.body.removedImageCover) {
-    req.body.removedImageCover = JSON.parse(req.body.removedImageCover);
-  }
-
   const bucketBaseUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/`;
-
-  //  images convet to key
   const removeKeys = Array.isArray(req.body.removedImages)
     ? req.body.removedImages.map(
         (url) => url.replace(bucketBaseUrl, "").split("?")[0]
@@ -147,6 +142,11 @@ exports.updateTour = async (req, res) => {
     (key) => !removeKeys.includes(key)
   );
 
+  if (req.body.removedImageCover) {
+    req.body.removedImageCover = JSON.parse(req.body.removedImageCover);
+  }
+
+  //  images convet to key
   // cover image convet to key
   let removeCoverKey = null;
 
@@ -161,8 +161,6 @@ exports.updateTour = async (req, res) => {
   }
 
   await tourdetails.save();
-
-  console.log(tourdetails.imageCover, "remvoe");
 
   // upload images
   if (req.file) {
