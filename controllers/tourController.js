@@ -148,12 +148,16 @@ exports.updateTour = async (req, res) => {
   );
 
   // cover image convet to key
-  const removeCoverKey = req.body.removedImageCover
-    .replace(bucketBaseUrl, "")
-    .split("?")[0];
+  let removeCoverKey = null;
 
-  if (tourdetails.imageCover === removeCoverKey) {
-    tourdetails.imageCover = null;
+  if (req.body.removedImageCover) {
+    removeCoverKey = req.body.removedImageCover
+      .replace(bucketBaseUrl, "")
+      .split("?")[0];
+
+    if (tourdetails.imageCover === removeCoverKey) {
+      tourdetails.imageCover = null;
+    }
   }
 
   await tourdetails.save();
