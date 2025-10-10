@@ -41,7 +41,7 @@ exports.getTour = catchAsync(async (req, res, next) => {
   const tour = await Tour.findById(req.params.id)
     .populate({
       path: "reviews",
-      populate: { path: "user", select: "name " },
+      populate: { path: "user", select: "name photo" },
       select: "-__v",
     })
     .populate({
@@ -74,9 +74,22 @@ exports.getTour = catchAsync(async (req, res, next) => {
     );
   }
 
-  // Optional: remove tour field from reviews
-  if (tour.reviews) {
-    tour.reviews.forEach((r) => delete r.tour);
+  // // Optional: remove tour field from reviews
+  // if (tour.reviews) {
+  //   tour.reviews.forEach((r) => delete r.tour);
+  // }
+
+  // ✅ Add Presigned URLs for Review User Photos
+  if (tour.reviews?.length) {
+    tour.reviews = await Promise.all(
+      tour.reviews.map(async (review) => {
+        if (review.user?.photo) {
+          review.user.photo = await generatePresignedUrl(review.user.photo);
+        }
+        delete review.tour; // optional cleanup
+        return review;
+      })
+    );
   }
 
   if (!tour) {
