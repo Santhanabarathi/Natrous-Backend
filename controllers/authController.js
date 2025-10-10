@@ -43,15 +43,17 @@ const refreshtoken = (user) => {
 };
 
 exports.createUser = async (req, res, next) => {
-  const { name, email, password, confirmPassword } = req.body;
+  if (req.profileImage) {
+    req.body.photo = req.profileImage.key;
+  }
+
+  const { name, email, password, confirmPassword, photo } = req.body;
 
   if (password !== confirmPassword) {
     return next(new AppError("password are not same", 400));
   }
 
   const pas = await bcrypt.hash(password, 10);
-
-  let photo = null;
 
   const newUser = await User.create({
     name,

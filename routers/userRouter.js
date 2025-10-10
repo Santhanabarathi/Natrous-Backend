@@ -6,7 +6,7 @@ const { verifyToken } = require("../controllers/authController");
 
 const router = express.Router();
 
-router.route("/signup").post(authController.createUser);
+router.route("/signup").post(uploadAllFiles, authController.createUser);
 router.route("/login").post(authController.loginUser);
 
 router
