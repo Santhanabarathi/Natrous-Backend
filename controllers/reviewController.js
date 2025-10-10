@@ -11,7 +11,7 @@ exports.createReview = catchAsync(async (req, res, next) => {
 
 exports.getAllReview = catchAsync(async (req, res, next) => {
   const review = await Review.find()
-    .populate("user", "name", "photo")
+    .populate("user", "name photo")
     .populate("tour", "name");
 
   const cleanReview = review.map((r) => {
@@ -20,7 +20,6 @@ exports.getAllReview = catchAsync(async (req, res, next) => {
     if (obj?.tour?.id) {
       delete obj?.tour?.id;
     }
-
     return obj;
   });
 
