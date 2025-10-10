@@ -17,8 +17,8 @@ exports.getAllReview = catchAsync(async (req, res, next) => {
   const cleanReview = review.map((r) => {
     const obj = r.toObject();
 
-    if (obj.tour.id) {
-      delete obj.tour.id;
+    if (obj?.tour?.id) {
+      delete obj?.tour?.id;
     }
 
     return obj;
